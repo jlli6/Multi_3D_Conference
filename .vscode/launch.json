@@ -1,0 +1,63 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "name": "Debug sfu",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/sfu",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/build/",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "Debug client",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/client",
+      "args": ["../config/client1_config.txt"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/build/",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "cwd": "/home/ljl/workspace/Multi_3D_Conference",
+      "program": "/home/ljl/workspace/Multi_3D_Conference/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
