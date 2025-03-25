@@ -7,7 +7,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/sfu",
-      "args": [],
+      "args": ["../config/sfu_config1.txt"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/build/",
       "environment": [],

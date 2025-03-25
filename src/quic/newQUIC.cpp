@@ -451,7 +451,12 @@ ssize_t QUIC::server_try_connect()
                             break;
                         }
 
-                        if (s == 4 && !stream_stat[s]) {
+                        // if (s == 4 && !stream_stat[s]) {
+                        //     fprintf(stdout, "opening stream: %" PRIu64 ".\n", s);
+                        //     stream_stat[s] = true;
+                        // }
+
+                        if (!stream_stat[s]) {
                             fprintf(stdout, "opening stream: %" PRIu64 ".\n", s);
                             stream_stat[s] = true;
                         }
@@ -616,8 +621,13 @@ ssize_t QUIC::quic_send(uint64_t s, uint8_t *buf, int len, bool fin, ssize_t *re
             // for (int num =0 ; num<17;num++){
             //     std::cout<<quiche_conn_stream_capacity(conn, num)<< std::endl;
             // }
-            // if (capacity >0)
-            //     std::cout<< "capacity:"<< capacity<<std::endl;
+            if (capacity >0) {
+                // std::cout<< "capacity:"<< capacity<< "len:"<< len <<std::endl;
+                // for (int i =0; i<10;i++)
+                //     // int test_cap = quiche_conn_stream_capacity(conn, i);
+                //     std::cout<< "capacity:"<< quiche_conn_stream_capacity(conn, i) << "of i:"<< i <<std::endl;
+            }
+            // std::cout<< "capacity:"<< capacity<< "len:"<< len <<std::endl;
             byte_send   = MIN(capacity, len);
             if (byte_send <= 0) {
                 if (!BolckFlag) {
@@ -632,8 +642,8 @@ ssize_t QUIC::quic_send(uint64_t s, uint8_t *buf, int len, bool fin, ssize_t *re
 
                     if (curLEVEL < DEBUGLEVEL)
                         fprintf(stdout, "%d ; %d\n", capacity, len);
-
                     fprintf(stdout, "No capacity in stream\n");
+                   
                 }
                 conn_mutex.unlock();
                 usleep(500);
@@ -749,8 +759,8 @@ ssize_t QUIC::quic_recv(uint8_t *recv_buf, ssize_t *ret)
     timeval thistime;
     err = select(sock + 1, &rd, NULL, NULL, &timeout);
     if (err == 0) { //timeout
-        if (curLEVEL < DEBUGLEVEL)
-            printf("select time out!\n");
+        // if (curLEVEL < DEBUGLEVEL)
+        //     printf("select time out!\n");
         *ret = 0;
         return 0;
     } else if (err == -1) { //failed

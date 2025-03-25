@@ -66,28 +66,31 @@ public:
             return;  // 直接返回，避免继续执行后续逻辑
         }
         std::cout << "Client " << clientId << ": 已连接 SFU" << std::endl;
-
-
-
     }
 
-    //模型上传前
-    void waitForReadySignal(){
-        // 同步信号
+    // 同步信号
+    void sync_open(uint64_t stream_id = 2, bool open = true) {
+
         std::cout << "Client " << clientId << ": 等待 SFU 发送 'READY' 信号..." << std::endl;
         uint8_t buf[10];
         ssize_t *length = new ssize_t(-1);
 
-        
-        quicConnection->open_stream(4);
+        if (open)
+            quicConnection->open_stream(stream_id);
+        //打印当前计算机时间,ms为单位
+        // std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+        // std::cout << "current time: " << ms.count() << std::endl;
 
-        // quicConnection->threadTimeout();
+        // std::cout<< "client isclosed before sync: " << quicConnection->isClosed <<std::endl;
+
+        quicConnection->threadTimeout();
 
         while (true) {
             quicConnection->quic_recv(buf, length);
             
 
             if (*length > 0 ) {
+                
                 std::cout << "Client: 收到 SFU 的 信号的 length: " << *length << std::endl;
                 
                 std::string receivedData(reinterpret_cast<char*>(buf), *length);
@@ -101,15 +104,70 @@ public:
             // std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
 
+        //  // 关闭流（终止读写）
+        // quiche_conn_stream_shutdown(quicConnection->conn, stream_id, QUICHE_SHUTDOWN_WRITE, 0); // 关闭写操作
+        // quiche_conn_stream_shutdown(quicConnection->conn, stream_id, QUICHE_SHUTDOWN_READ, 0);  // 关闭读操作
+        delete length;
+    }
+    // 同步信号
+    void sync_sfu(uint64_t stream_id = 2, bool open = true) {
+
+        std::cout << "Client " << clientId << ": 等待 SFU 发送 'READY' 信号..." << std::endl;
+        uint8_t buf[10];
+        ssize_t *length = new ssize_t(-1);
+
+        if (open)
+            quicConnection->open_stream(stream_id);
+        //打印当前计算机时间,ms为单位
+        std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+        std::cout << "current time: " << ms.count() << std::endl;
+
+        std::cout<< "client isclosed before sync: " << quicConnection->isClosed <<std::endl;
+
+        quicConnection->threadTimeout();
+
+        while (true) {
+            quicConnection->quic_recv(buf, length);
+            
+
+            if (*length > 0 ) {
+                
+                std::cout << "Client: 收到 SFU 的 信号的 length: " << *length << std::endl;
+                
+                std::string receivedData(reinterpret_cast<char*>(buf), *length);
+                std::cout<< "receivedData: " << receivedData << std::endl;
+                if (receivedData =="READY") {
+                    std::cout << "Client: 收到 SFU 的 'READY' 信号，开始上传模型数据" << std::endl;
+                    break;
+                }
+                // break;
+            }
+            // std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+
+        //  // 关闭流（终止读写）
+        // quiche_conn_stream_shutdown(quicConnection->conn, stream_id, QUICHE_SHUTDOWN_WRITE, 0); // 关闭写操作
+        // quiche_conn_stream_shutdown(quicConnection->conn, stream_id, QUICHE_SHUTDOWN_READ, 0);  // 关闭读操作
         delete length;
     }
 
+    //模型上传前
+    void waitForReadySignal(uint64_t stream_id = 4){
+        sync_open(stream_id);
+    }
+
+    //模型下载前
+    void waitForDownloadSignal(uint64_t stream_id = 4){
+        sync_sfu(stream_id);
+    }
+    
     // 模型上传阶段：将本地模型文件上传到 SFU
     void uploadModel(uint64_t stream_id = 4) {
         std::cout << "Client " << clientId << ": 开始上传模型文件到 SFU" << std::endl;
 
         quiche_stats stats;
         // quiche_conn_stats(quicConnection, stats);
+
 
         uint8_t *recvbuf = new uint8_t[MAX_BUF];
         ssize_t *recvret = new ssize_t(-1);
@@ -138,16 +196,29 @@ public:
 
         cout<<"start sending model.."<<endl;
         int stop_cnt = 0;
+
+
+        //输出doneFlagLength
+        // std::cout << "doneFlagLength: " << doneFlagLength << std::endl;
+    
         
         int len_flush = 2048;
         while(true){
 
+            // if (*recvret == 0){
+            //     std::cout << "Received Data (Hex): ";
+            //     for (size_t i = 0; i < 4; i++) {
+            //         std::cout << std::hex << std::setw(2) << std::setfill('0') 
+            //                 << static_cast<int>(recvbuf[i]) << " ";
+            //     }
+            //     std::cout << std::dec << std::endl;  // 恢复为十进制格式
+            // }
                 
             int len = read(model_fd, vbuffer, MAX_BUF);
             if (len > 0){
                 stop_cnt = 0;
                 quicConnection->quic_send(stream_id, vbuffer, len, false, ret);
-                // std::cout << "send model data: " << len << std::endl;
+                std::cout << "send model data: " << len << std::endl;
                 // usleep(500000);
             }
             else if (len == 0){
@@ -180,7 +251,7 @@ public:
     
         std::cout << "Client " << clientId << ": 模型文件上传完毕" << std::endl;
 
-        quicConnection->stop_recv();
+        // quicConnection->stop_recv();
 
         //关闭流
         // quiche_conn_stream_shutdown(quicConnection->conn, stream_id, QUICHE_SHUTDOWN_WRITE, 0); // 关闭写操作
@@ -278,13 +349,11 @@ int main(int argc, char* argv[]) {
     Client client;
     client.loadConfig(CONFIG_PATH);  // 使用传入的配置路径
     client.connectToSFU();
-    // client.waitForReadySignal();
-    // // 休眠一段时间等待程序完成
-    client.uploadModel(4);
+    client.waitForReadySignal(4);
+    // 休眠一段时间等待程序完成
+    
 
-    usleep(1000000);
-    std::cout << "Client: 再上传一次" << std::endl;
-    client.uploadModel(6);
+    client.uploadModel(4);
 
 
     // client.waitForDownloadSignal();
