@@ -114,6 +114,9 @@
     "thread": "cpp",
     "cinttypes": "cpp",
     "typeinfo": "cpp",
-    "image": "cpp"
+    "image": "cpp",
+    "cstdarg": "cpp",
+    "deque": "cpp",
+    "list": "cpp"
   }
 }

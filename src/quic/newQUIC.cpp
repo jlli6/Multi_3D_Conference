@@ -566,6 +566,9 @@ ssize_t QUIC::client_connect(char *host)
     */
 ssize_t QUIC::quic_send(uint64_t s, uint8_t *buf, int len, bool fin, ssize_t *ret)
 {
+    //print s
+    if (curLEVEL_3D < DEBUGLEVEL)
+        fprintf(stdout, "Sending: stream %d\n", s);
     timeval start, end;
     bool    BolckFlag     = false;
     bool    NonBlockFlage = false;
@@ -612,7 +615,7 @@ ssize_t QUIC::quic_send(uint64_t s, uint8_t *buf, int len, bool fin, ssize_t *re
                         (1000 * flushtime.tv_sec + flushtime.tv_usec / 1000));
             }
             int capacity = quiche_conn_stream_capacity(conn, s);
-
+            // fprintf(stdout,"cap stream: %d \n", s);
             // for (int num =0 ; num<17;num++){
             //     std::cout<<quiche_conn_stream_capacity(conn, num)<< std::endl;
             // }
@@ -632,8 +635,9 @@ ssize_t QUIC::quic_send(uint64_t s, uint8_t *buf, int len, bool fin, ssize_t *re
 
                     if (curLEVEL < DEBUGLEVEL)
                         fprintf(stdout, "%d ; %d\n", capacity, len);
-
-                    fprintf(stdout, "No capacity in stream\n");
+                    
+                    fprintf(stdout, "No capacity in stream %d\n",s);
+                    fprintf(stdout, "%d ; %d\n", capacity, len);
                 }
                 conn_mutex.unlock();
                 usleep(500);
@@ -848,7 +852,8 @@ ssize_t QUIC::quic_recv(uint8_t *recv_buf, ssize_t *ret)
                 } else {
                     memcpy(recv_buf + total_len, buf, recv_len);
                     total_len += recv_len;
-
+                    if (curLEVEL_3D < DEBUGLEVEL)
+                        fprintf(stdout, "quic_recv: 从流 ID %" PRIu64 " 接收到 %zd 字节数据\n", s, recv_len);
                     if (curLEVEL < DEBUGLEVEL)
                         fprintf(stdout, "total_len: %d\n", total_len);
                 }

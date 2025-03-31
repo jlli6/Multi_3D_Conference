@@ -24,6 +24,7 @@ using namespace std;
 
 #define DEBUGLEVEL 10
 #define curLEVEL 20
+#define curLEVEL_3D 20
 
 #define LOCAL_CONN_ID_LEN 16
 #define MAX_DATAGRAM_SIZE 1350
