@@ -153,6 +153,7 @@ class Client {
     
         // 下载模型阶段
         void downloadModel(uint64_t stream_id = 4) {
+            
             connectToSFU();  // 重新建立 QUIC 连接
     
             std::cout << "Client " << clientId << ": 开始下载模型文件..." << std::endl;
