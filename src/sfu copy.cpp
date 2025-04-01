@@ -236,6 +236,7 @@ public:
                 std::cout << "SFU: 客户端 " << clientId << " 模型上传完毕，保存到文件 " << filename << std::endl;
 
                 // std::cout<< "sfu isclosed after save model: " << conn->isClosed <<std::endl;
+                delete length;
                 exit(0);  // 子进程处理完后退出
             }
             else if (pid < 0) {

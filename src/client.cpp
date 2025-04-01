@@ -14,8 +14,8 @@
 // #include "quic/quiche.h"
 #include "quic/newQUIC.h"  // newQUIC.h 内包含了你实现的 QUIC 类
 
-#define curLEVEL 30
-#define DEBUGLEVEL 20
+// #define curLEVEL 30
+// #define DEBUGLEVEL 20
 
 // Client class
 class Client {
@@ -40,6 +40,8 @@ class Client {
             // 初始化 QUIC 连接（客户端）
             quicConnection->client_init(const_cast<char*>(sfuIp.c_str()), const_cast<char*>(adjustedPortStr.c_str()));
     
+            // 输出当前client的ip和port
+            std::cout << "Client " << clientId << ": IP = " << sfuIp << ", Port = " << adjustedPort << std::endl;
             // 尝试连接 SFU
             int connect_status = quicConnection->client_connect(const_cast<char*>(sfuIp.c_str()));
             if (connect_status < 0) {
@@ -84,7 +86,7 @@ class Client {
         // 上传模型阶段
         void uploadModel(uint64_t stream_id = 4) {
             connectToSFU();  // 重新建立 QUIC 连接
-            usleep(500000);  // 等待连接稳定
+            usleep(5000000);  // 等待连接稳定
     
             std::cout << "Client " << clientId << ": 开始上传模型文件到 SFU" << std::endl;
     
@@ -155,13 +157,15 @@ class Client {
         void downloadModel(uint64_t stream_id = 4) {
             
             connectToSFU();  // 重新建立 QUIC 连接
-    
+
             std::cout << "Client " << clientId << ": 开始下载模型文件..." << std::endl;
     
             // 准备接收缓冲区
             std::vector<uint8_t> modelData;
             uint8_t recvbuf[MAX_BUF];
             ssize_t receivedBytes;
+
+            int totalReceived = 0;  // 记录接收到的总字节数
     
             while (true) {
                 // 接收模型数据
@@ -176,8 +180,8 @@ class Client {
     
                     // 将接收到的数据追加到模型数据中
                     modelData.insert(modelData.end(), recvbuf, recvbuf + receivedBytes);
-
-                    if (curLEVEL< DEBUGLEVEL)
+                    totalReceived += receivedBytes;
+                    if (curLEVEL < DEBUGLEVEL)
                         std::cout << "Client " << clientId << ": 接收到数据长度: " << receivedBytes << " 字节" << std::endl;
                 } else if (receivedBytes == 0) {
                     // 如果接收到 0 字节，可能是流关闭或无数据，继续等待
@@ -195,7 +199,7 @@ class Client {
             outfile.write(reinterpret_cast<char*>(modelData.data()), modelData.size());
             outfile.close();
     
-            std::cout << "Client " << clientId << ": 模型文件已保存为 " << filename << std::endl;
+            std::cout << "Client " << clientId << ": 模型文件已保存为 " << filename <<" , total size: "<< totalReceived<< std::endl;
     
             disconnectFromSFU();  // 释放 QUIC 连接
         }
@@ -268,9 +272,9 @@ class Client {
     
         try {
             client.uploadModel();
-            sleep(1);
+            sleep(3); //要比sfu这里sleep长一些，先把sfu的server打开
             client.downloadModel(4);
-            sleep(3);
+            sleep(1);
             // client.runConferencePhase();
         } catch (const std::exception& e) {
             std::cerr << "程序运行时发生错误: " << e.what() << std::endl;
