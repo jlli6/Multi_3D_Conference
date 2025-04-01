@@ -6,6 +6,7 @@
 #include <mutex>
 #include <queue>
 #include <chrono>
+#include <map>  // Added to use std::map
 
 #include <cstring>  // 添加该头文件来使用 memcpy
 
@@ -86,7 +87,7 @@ class Client {
         // 上传模型阶段
         void uploadModel(uint64_t stream_id = 4) {
             connectToSFU();  // 重新建立 QUIC 连接
-            usleep(5000000);  // 等待连接稳定
+            sleep(3);  // 等待连接稳定
     
             std::cout << "Client " << clientId << ": 开始上传模型文件到 SFU" << std::endl;
     
@@ -162,10 +163,13 @@ class Client {
     
             // 准备接收缓冲区
             std::vector<uint8_t> modelData;
+            std::map<std::string, std::vector<uint8_t>> modelDataMap;
             uint8_t recvbuf[MAX_BUF];
             ssize_t receivedBytes;
 
-            int totalReceived = 0;  // 记录接收到的总字节数
+            std::string currentClientId; //当前正在接收的clientID  
+            
+            std::map<std::string, int> totalReceived;
     
             while (true) {
                 // 接收模型数据
@@ -177,10 +181,29 @@ class Client {
                         std::cout << "Client " << clientId << ": 收到完成标志，结束接收" << std::endl;
                         break;
                     }
-    
-                    // 将接收到的数据追加到模型数据中
-                    modelData.insert(modelData.end(), recvbuf, recvbuf + receivedBytes);
-                    totalReceived += receivedBytes;
+                    if (receivedBytes == 7 && std::memcmp(recvbuf, "client", 6) == 0){ //这里假设clientId是单独发送过来的，不包含模型数据（目前的quic就是这样发的）
+                        currentClientId = std::string(reinterpret_cast<char*>(recvbuf + 6), 1);
+                        std::cout << "Client " << clientId << ": 收到来自 SFU 的 "<< currentClientId<<" 模型数据" << std::endl;
+
+                        // // 将接收到的数据追加到模型数据中
+                        // modelDataMap[currentClientId].insert(
+                        // modelDataMap[currentClientId].end(),
+                        // recvbuf,  // 跳过 clientId 部分
+                        // recvbuf + receivedBytes 
+                        // );
+                        // modelData.insert(modelData.end(), recvbuf, recvbuf + receivedBytes);
+                        // totalReceived[currentClientId] += receivedBytes;
+                    }else{
+                        // 将接收到的数据追加到模型数据中
+                        modelDataMap[currentClientId].insert(
+                        modelDataMap[currentClientId].end(),
+                        recvbuf,  // 跳过 clientId 部分
+                        recvbuf + receivedBytes 
+                        );
+                        modelData.insert(modelData.end(), recvbuf, recvbuf + receivedBytes);
+                        totalReceived[currentClientId] += receivedBytes;
+                    }
+                    
                     if (curLEVEL < DEBUGLEVEL)
                         std::cout << "Client " << clientId << ": 接收到数据长度: " << receivedBytes << " 字节" << std::endl;
                 } else if (receivedBytes == 0) {
@@ -193,13 +216,26 @@ class Client {
                 }
             }
     
-            // 保存模型数据到文件
-            std::string filename = "../resource/client_receive_model/" + clientId +"/" + clientId+".zip";
-            std::ofstream outfile(filename, std::ios::binary);
-            outfile.write(reinterpret_cast<char*>(modelData.data()), modelData.size());
-            outfile.close();
+            // 遍历map, 保存模型数据到文件
+            for (const auto& [receivedClientId, modelData] : modelDataMap) {
+                std::cout << "Client " << clientId << ": 收到来自 " << receivedClientId << " 的模型数据" << std::endl;
+                std::cout << "Client " << clientId << ": 接收到数据长度: " << totalReceived[receivedClientId] << " 字节" << std::endl;
     
-            std::cout << "Client " << clientId << ": 模型文件已保存为 " << filename <<" , total size: "<< totalReceived<< std::endl;
+                // 保存模型数据到文件
+                std::string folderPath = "../resource/client_receive_model/" + clientId;
+                std::string filename = folderPath + "/model_client" + receivedClientId + ".zip";
+
+                // 创建文件夹（如果不存在）
+                std::string mkdirCommand = "mkdir -p " + folderPath;
+                system(mkdirCommand.c_str());
+
+                std::ofstream outfile(filename, std::ios::binary);
+                outfile.write(reinterpret_cast<const char*>(modelData.data()), modelData.size());
+                outfile.close();
+    
+                std::cout << "Client " << clientId << ": 模型文件已保存为 " << filename <<" , total size: "<< totalReceived[receivedClientId]<< std::endl;
+            }
+            std::cout << "Client " << clientId << ": 模型文件下载完毕" << std::endl;
     
             disconnectFromSFU();  // 释放 QUIC 连接
         }

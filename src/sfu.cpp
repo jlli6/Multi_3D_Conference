@@ -117,11 +117,11 @@ class SFU {
             portOffset += 10;  // 增加端口偏移量，避免下次冲突
             clientsDisconnected = false;  // 重置标志位
 
-            // 输出clientConnections 中的信息
-            std::cout << "SFU: 当前已建立的客户端连接信息:" << std::endl;
-            for (const auto& connection : clientConnections) {
-                std::cout << "客户端 ID: " << connection.first << ", 连接对象地址: " << connection.second << std::endl;
-            }
+            // // 输出clientConnections 中的信息
+            // std::cout << "SFU: 当前已建立的客户端连接信息:" << std::endl;
+            // for (const auto& connection : clientConnections) {
+            //     std::cout << "客户端 ID: " << connection.first << ", 连接对象地址: " << connection.second << std::endl;
+            // }
             
         }
     
@@ -319,6 +319,7 @@ class SFU {
 
                 targetConn->threadRecv(recvbuf, recvret);
 
+                ssize_t sentBytes = 0;
                 // 遍历所有客户端模型，排除目标客户端自身的模型
                 for (auto& modelKv : clientConnections) {
                     std::string modelClientId = modelKv.first;  // 模型所属客户端 ID
@@ -343,7 +344,7 @@ class SFU {
 
                     // 发送模型所属客户端 ID 信息
                     const std::string idInfo = modelClientId;
-                    ssize_t sentBytes = 0;
+                    
 
                     std::cout<<"idinfo size: "<< idInfo.size()<<std::endl;
                     if (targetConn->quic_send(stream_id, reinterpret_cast<uint8_t*>(const_cast<char*>(idInfo.data())), idInfo.size(), false, &sentBytes) < 0) {
@@ -364,18 +365,17 @@ class SFU {
                         if (curLEVEL < DEBUGLEVEL)
                             std::cout << "SFU: 已向客户端 " << targetClientId << " 发送 " << sentBytes << " 字节数据" << std::endl;
                     }
+                }
+                // 所有模型发送完毕之后（目前是两个），发送完成标志
+                const char* doneFlag = "1";
+                size_t doneFlagLength = strlen(doneFlag);
+                uint8_t buffer[doneFlagLength];
+                std::memcpy(buffer, doneFlag, doneFlagLength);
 
-                    // 发送完成标志
-                    const char* doneFlag = "1";
-                    size_t doneFlagLength = strlen(doneFlag);
-                    uint8_t buffer[doneFlagLength];
-                    std::memcpy(buffer, doneFlag, doneFlagLength);
-
-                    if (targetConn->quic_send(stream_id, buffer, doneFlagLength, false, &sentBytes) < 0) {
-                        std::cerr << "SFU: 向客户端 " << targetClientId << " 发送完成标志失败" << std::endl;
-                    } else {
-                        std::cout << "SFU: 已向客户端 " << targetClientId << " 发送完成标志" << std::endl;
-                    }
+                if (targetConn->quic_send(stream_id, buffer, doneFlagLength, false, &sentBytes) < 0) {
+                    std::cerr << "SFU: 向客户端 " << targetClientId << " 发送完成标志失败" << std::endl;
+                } else {
+                    std::cout << "SFU: 已向客户端 " << targetClientId << " 发送完成标志" << std::endl;
                 }
 
                 // 释放动态分配的内存
@@ -393,6 +393,7 @@ class SFU {
             }
         }
         while (waitpid(-1, nullptr, 0) > 0);
+        sleep(5); //发送完毕等一会，确定client都接收了
         disconnectFromClients();  // 释放 QUIC 连接
     }
     

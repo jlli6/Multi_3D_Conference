@@ -1,0 +1,146 @@
+SFU: 配置加载完毕，共 3 个客户端
+SFU: 正在连接所有客户端...
+SFU: 正在连接客户端 client1 的 IP: 127.0.0.1 和端口: 12345
+init odcid
+sent 55 bytes
+init odcid
+sent 93 bytes
+init odcid
+validate_token
+recv 1200 bytes
+recv would block
+init odcid
+recv 1200 bytes
+recv would block
+new connection
+SFU: 客户端 client1 (127.0.0.1:12345) 已通过 QUIC 连接
+SFU: 正在连接客户端 client2 的 IP: 127.0.0.1 和端口: 12346
+init odcid
+sent 55 bytes
+init odcid
+sent 93 bytes
+init odcid
+validate_token
+recv 1200 bytes
+recv would block
+init odcid
+recv 1200 bytes
+recv would block
+new connection
+SFU: 客户端 client2 (127.0.0.1:12346) 已通过 QUIC 连接
+SFU: 正在连接客户端 client3 的 IP: 127.0.0.1 和端口: 12348
+init odcid
+sent 55 bytes
+init odcid
+sent 93 bytes
+init odcid
+validate_token
+recv 1200 bytes
+recv would block
+init odcid
+recv 1200 bytes
+recv would block
+new connection
+SFU: 客户端 client3 (127.0.0.1:12348) 已通过 QUIC 连接
+SFU: 开始模型上传阶段
+SFU: 客户端 client1 模型上传完成
+SFU: 客户端 client1 模型保存到文件 ../resource/sfu_receive_model/model_client1.zipTotal size:5174384
+SFU: 客户端 client2 模型上传完成
+SFU: 客户端 client2 模型保存到文件 ../resource/sfu_receive_model/model_client2.zipTotal size:5174384
+SFU: 客户端 client3 模型上传完成
+SFU: 客户端 client3 模型保存到文件 ../resource/sfu_receive_model/model_client3.zipTotal size:5174384
+SFU: 端接收到所有模型
+SFU: 已释放所有客户端的 QUIC 连接
+SFU: 正在连接所有客户端...
+SFU: 正在连接客户端 client1 的 IP: 127.0.0.1 和端口: 12355
+init odcid
+sent 55 bytes
+init odcid
+sent 93 bytes
+init odcid
+validate_token
+recv 1200 bytes
+recv would block
+init odcid
+recv 1200 bytes
+recv would block
+new connection
+SFU: 客户端 client1 (127.0.0.1:12355) 已通过 QUIC 连接
+SFU: 正在连接客户端 client2 的 IP: 127.0.0.1 和端口: 12356
+init odcid
+sent 55 bytes
+init odcid
+sent 93 bytes
+init odcid
+validate_token
+recv 1200 bytes
+recv would block
+init odcid
+recv 1200 bytes
+recv would block
+new connection
+SFU: 客户端 client2 (127.0.0.1:12356) 已通过 QUIC 连接
+SFU: 正在连接客户端 client3 的 IP: 127.0.0.1 和端口: 12358
+init odcid
+sent 55 bytes
+init odcid
+sent 93 bytes
+init odcid
+validate_token
+recv 1200 bytes
+recv would block
+init odcid
+recv 1200 bytes
+recv would block
+new connection
+SFU: 客户端 client3 (127.0.0.1:12358) 已通过 QUIC 连接
+SFU: 开始模型下载阶段
+SFU: 已读取客户端 client1 的模型文件，大小为 5174384 字节
+idinfo size: 7
+SFU: 已向客户端 client2 发送模型 ID 信息: client1
+SFU: 已读取客户端 client2 的模型文件，大小为 5174384 字节
+idinfo size: 7
+SFU: 已向客户端 client1 发送模型 ID 信息: client2
+SFU: 已读取客户端 client1 的模型文件，大小为 5174384 字节
+idinfo size: 7
+SFU: 已向客户端 client3 发送模型 ID 信息: client1
+No capacity in stream 7
+0 ; 8604
+No capacity in stream 7
+0 ; 3204
+SFU: 已读取客户端 client3 的模型文件，大小为 5174384 字节
+idinfo size: 7
+SFU: 已向客户端 client2 发送模型 ID 信息: client3
+No capacity in stream 7
+0 ; 31922
+No capacity in stream 7
+0 ; 7254
+SFU: 已读取客户端 client2 的模型文件，大小为 5174384 字节
+idinfo size: 7
+SFU: 已向客户端 client3 发送模型 ID 信息: client2
+No capacity in stream 7
+0 ; 25172
+No capacity in stream 7
+0 ; 27872
+SFU: 已读取客户端 client3 的模型文件，大小为 5174384 字节
+idinfo size: 7
+SFU: 已向客户端 client1 发送模型 ID 信息: client3
+No capacity in stream 7
+0 ; 25172
+No capacity in stream 7
+0 ; 14372
+SFU: 已向客户端 client2 发送完成标志
+SFU: 客户端 client2 模型下载完成
+No capacity in stream 7
+0 ; 15722
+No capacity in stream 7
+0 ; 15722
+SFU: 已向客户端 client3 发送完成标志
+SFU: 客户端 client3 模型下载完成
+No capacity in stream 7
+0 ; 29726
+No capacity in stream 7
+0 ; 8998
+SFU: 已向客户端 client1 发送完成标志
+SFU: 客户端 client1 模型下载完成
+SFU: 已释放所有客户端的 QUIC 连接

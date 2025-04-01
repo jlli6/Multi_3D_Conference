@@ -1,0 +1,22 @@
+Client client2: 配置加载完毕，SFU 地址为 0.0.0.0:12346
+Client client2: 正在连接 SFU...
+Client client2: IP = 0.0.0.0, Port = 12346
+Client client2: 已连接 SFU
+Client client2: 开始上传模型文件到 SFU
+Client client2: 模型文件上传完毕,send size: 5174384
+Client client2: 已释放 QUIC 连接
+Client client2: 正在连接 SFU...
+Client client2: IP = 0.0.0.0, Port = 12356
+Client client2: 已连接 SFU
+Client client2: 开始下载模型文件...
+Client client2: 收到来自 SFU 的 1 模型数据
+Client client2: 收到来自 SFU 的 3 模型数据
+Client client2: 收到完成标志，结束接收
+Client client2: 收到来自 1 的模型数据
+Client client2: 接收到数据长度: 5174384 字节
+Client client2: 模型文件已保存为 ../resource/client_receive_model/client2/model_client1.zip , total size: 5174384
+Client client2: 收到来自 3 的模型数据
+Client client2: 接收到数据长度: 5174384 字节
+Client client2: 模型文件已保存为 ../resource/client_receive_model/client2/model_client3.zip , total size: 5174384
+Client client2: 模型文件下载完毕
+Client client2: 已释放 QUIC 连接
